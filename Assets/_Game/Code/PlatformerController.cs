@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlatformerController : MonoBehaviour
@@ -10,14 +11,16 @@ public class PlatformerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
-    
+
     private Rigidbody2D rb;
+    Animator animator;
     private bool isGrounded;
     private float moveInput;
     
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         
         // Set to Dynamic with gravity
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -29,6 +32,7 @@ public class PlatformerController : MonoBehaviour
     {
         // Get horizontal input
         moveInput = Input.GetAxisRaw("Horizontal");
+        animator.SetBool("isJumping", !isGrounded);
         
         // Check if grounded
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
@@ -37,6 +41,8 @@ public class PlatformerController : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            animator.SetBool("isJumping", !isGrounded);
+            
         }
     }
     
@@ -44,6 +50,10 @@ public class PlatformerController : MonoBehaviour
     {
         // Apply horizontal movement
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+        
+        animator.SetFloat("xVelocity", math.abs(rb.linearVelocity.x));
+        animator.SetFloat("yVelocity", rb.linearVelocity.y);
+        
     }
     
     // Visualise ground check in editor
